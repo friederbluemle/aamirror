@@ -14,54 +14,56 @@ import androidx.core.app.NotificationCompat;
 
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 
-public class ForegroundService extends Service
-{
+public class ForegroundService extends Service {
     private static final String TAG = "ForegroundService";
     private static final String CHANNEL_ID = "com.github.slashmax.aamirror";
-    private static final int    ONGOING_NOTIFICATION_ID = 1;
+    private static final int ONGOING_NOTIFICATION_ID = 1;
 
-    public ForegroundService()
-    {
+    public ForegroundService() {
+    }
+
+    static void startForegroundService(Context context) {
+        Intent intentService = new Intent(context, ForegroundService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            context.startForegroundService(intentService);
+        else
+            context.startService(intentService);
+    }
+
+    static void stopForegroundService(Context context) {
+        context.stopService(new Intent(context, ForegroundService.class));
     }
 
     @Override
-    public void onCreate()
-    {
+    public void onCreate() {
         super.onCreate();
         startNotification();
     }
 
     @Override
-    public void onDestroy()
-    {
+    public void onDestroy() {
         stopNotification();
         super.onDestroy();
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId)
-    {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && intent.getAction() != null && intent.getAction().equals("STOP"))
             stopSelf();
         return START_STICKY;
     }
 
     @Override
-    public IBinder onBind(Intent intent)
-    {
+    public IBinder onBind(Intent intent) {
         return null;
     }
 
-    private void startNotification()
-    {
-        try
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            {
+    private void startNotification() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationManager notificationManager = getSystemService(NotificationManager.class);
                 if (notificationManager != null &&
-                    notificationManager.getNotificationChannel(CHANNEL_ID) == null)
-                {
+                        notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
                     CharSequence channelName = getString(R.string.notification_channel_name);
                     String channelDescription = getString(R.string.notification_channel_description);
 
@@ -88,36 +90,16 @@ public class ForegroundService extends Service
                 startForeground(ONGOING_NOTIFICATION_ID, builder.build(), FOREGROUND_SERVICE_TYPE_MANIFEST);
             else
                 startForeground(ONGOING_NOTIFICATION_ID, builder.build());
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.d(TAG, "startNotification exception : " + e.toString());
         }
     }
 
-    private void stopNotification()
-    {
-        try
-        {
+    private void stopNotification() {
+        try {
             stopForeground(true);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.d(TAG, "stopNotification exception : " + e.toString());
         }
-    }
-
-    static void startForegroundService(Context context)
-    {
-        Intent intentService = new Intent(context, ForegroundService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            context.startForegroundService(intentService);
-        else
-            context.startService(intentService);
-    }
-
-    static void stopForegroundService(Context context)
-    {
-        context.stopService(new Intent(context, ForegroundService.class));
     }
 }

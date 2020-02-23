@@ -9,19 +9,16 @@ import java.util.List;
 
 import eu.chainfire.libsuperuser.Shell;
 
-class MinitouchDaemon
-{
+class MinitouchDaemon {
     private static final String TAG = "MinitouchDaemon";
 
     private Context m_Context;
 
-    MinitouchDaemon(Context context)
-    {
+    MinitouchDaemon(Context context) {
         m_Context = context;
     }
 
-    void start()
-    {
+    void start() {
         String path = install();
         if (path == null || path.isEmpty())
             return;
@@ -30,16 +27,13 @@ class MinitouchDaemon
         Shell.SU.run(path);
     }
 
-    void stop(int pid)
-    {
+    void stop(int pid) {
         if (pid != 0)
             Shell.SU.run("kill " + pid);
     }
 
-    private String install()
-    {
-        try
-        {
+    private String install() {
+        try {
             FileOutputStream fileOutputStream = m_Context.openFileOutput("minitouch", 0);
             String assetName = getAssetFile();
             InputStream assetFile = m_Context.getAssets().open(assetName);
@@ -50,9 +44,7 @@ class MinitouchDaemon
 
             assetFile.close();
             fileOutputStream.close();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.d(TAG, "install exception: " + e.toString());
             return null;
         }
@@ -60,13 +52,11 @@ class MinitouchDaemon
         return m_Context.getFileStreamPath("minitouch").getAbsolutePath();
     }
 
-    private String getAssetFile()
-    {
+    private String getAssetFile() {
         return ("libs/" + detectAbi() + "/minitouch");
     }
 
-    private String detectAbi()
-    {
+    private String detectAbi() {
         List<String> result = Shell.SH.run("getprop ro.product.cpu.abi");
         if (result != null && !result.isEmpty())
             return result.get(0);
